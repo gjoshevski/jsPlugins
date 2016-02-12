@@ -20,16 +20,19 @@ $.fn.dataTable.Api.register( 'switchableGroupedRows()', function (indexSwitchabl
   tabelId = table[0].id;
   var foundRecordsToBeMearged = false;
 
+  // dataTable data
   var data = this.data();
   var newData = {};
 
-console.log("OK");
+//  console.log("OK");
+
   for(var i=0; i < data.length; i++){
     var key = sgrGenUniqKeyName(data[i],indexGrouped);
 
     if(newData[key]){
       //MERGE FUNCTION
       newData[key] = sgrAddSelectOption(newData[key],data[i], indexSwitchable, tabelId);
+
       foundRecordsToBeMearged =true;
     }else{
       newData[key] = data[i];
@@ -61,7 +64,7 @@ var sgrAddSelectOption = function(data, dataToAdd,indexSwitchable, tableId){
   var currentField = data[indexSwitchable];
   var valueToAdd = dataToAdd[indexSwitchable];
 
-  if(currentField.indexOf("<select>") == -1){
+  if(currentField.indexOf("<select") == -1){
     currentField =  $('<select style="padding:0px; margin:0px;" onchange="sgrChangedSwitchableRow(this,'+tableId+','+indexSwitchable+')"> </select>');
     $(currentField).append($("<option></option>")
           .attr("value",data.join(" |; "))
@@ -80,7 +83,7 @@ var sgrAddSelectOption = function(data, dataToAdd,indexSwitchable, tableId){
 }
 
 /*
-* select -> the select field
+* select -> the select field object
 * selector table ID
 * indexSwitchable -> index of the switchable collumn
 */
@@ -88,25 +91,15 @@ var sgrChangedSwitchableRow = function(select,selector,indexSwitchable){
 
   var selValue = select.value;
 
-  var dataArray = selValue.split(" |; ");
+  var dataArrayFromSelectedOption = selValue.split(" |; ");
   var api = $(selector).DataTable();
+
   var tr = $(select).closest("tr");
-  var rowindex =  tr.index();
 
-  var row = api.rows(tr);
-
-    console.log(tr);
-    console.log(row);
-
-
-  var newData = dataArray;
-
-  for(i=0;i< row.data().length;i++){
-    if(i==indexSwitchable){
-      newData[i] = row.data()[i];
+  $(tr).find('td').each (function(column, td) {
+    if(column!=indexSwitchable){
+      td.innerHTML = dataArrayFromSelectedOption[column];
     }
-  }
-
-  row.data(newData);
+  });
 
 }
